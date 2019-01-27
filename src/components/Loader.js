@@ -5,40 +5,72 @@ import Product from './Product';
 import Category from './Category';
 
 class Loader extends Component {
+  readFile = (results) => {
+    let categories = [];
+    let products = [];
+    let orders = [];
+    //let startTime = new Date();
 
-  handleForce = (results) => {
-    var categories = [];
-    var products = [];
-    var orders = [];
+    for (let i = 1; i < results.length - 1; i++) {
+      let row = results[i];
+      let categoryName = row[15];
+      let categoryIndex = -1;
 
-    for (let i = 1; i < results.length; i++) {
-      let element = results[i];
-
-      categories.push(new Category(element[15], element[16]));
-
-      products.push(new Product(element[17], /*element[1],*/ element[4], categories[i - 1]));
-
-      if (i === 1) {
-        orders.push(new Order(element[1], element[2], element[3], /* element[4], */ products[i - 1]));
-      } else {
-        var repeatedId = -1;
-
-        for (let j = 0; j < orders.length; j++) {
-          if (element[1] === orders[j].orderId) {
-            repeatedId = j;
-            orders[j].products.push(products[i - 1]);
-          }
+      for (let j = 0; j < categories.length; j++) {
+        if (categoryName === categories[j].categoryName) {
+          categoryIndex = j;
+          break;
         }
+      }
 
-        if (repeatedId === -1) {
-          orders.push(new Order(element[1], element[2], element[3], /* element[4], */ products[i - 1]));
+      if (categoryIndex === -1) {
+        let category = new Category(categoryName);
+        categories.push(category);
+        categoryIndex = categories.length - 1;
+      }
+
+      let productName = row[17];
+      let subcategoryName = row[16];
+      let productIndex = -1;
+
+      for (let j = 0; j < products.length; j++) {
+        if (productName === products[j].productName) {
+          productIndex = j;
+          break;
         }
+      }
+
+      if (productIndex === -1) {
+        let product = new Product(productName, categories[categoryIndex], subcategoryName);
+        products.push(product);
+        productIndex = products.length - 1;
+      }
+
+      let orderId = row[1];
+      let orderDate = row[2];
+      let orderPriority = row[3];
+      let orderQuantity = row[4];
+      let orderIndex = -1;
+
+      for (let j = 0; j < orders.length; j++) {
+        if (orderId === orders[j].orderId) {
+          orderIndex = j;
+          orders[orderIndex].products.push({ orderQuantity: orderQuantity, product: products[productIndex] });
+          products[productIndex].orders.push(orders[orderIndex]);
+          break;
+        }
+      }
+      if (orderIndex === -1) {
+        orders.push(new Order(orderId, orderDate, orderPriority, products[productIndex], orderQuantity));
       }
     }
 
-    /* console.log(categories, "Categories");
-    console.log(products, "Products"); */
+    //let endTime = new Date();
+    //let executionTime = endTime.getTime() - startTime.getTime();
+    //console.log("ms", executionTime);
     console.log(orders, "Orders");
+    console.log(products, "Products");
+    console.log(categories, "Categories");
   }
 
   render() {
@@ -46,7 +78,7 @@ class Loader extends Component {
       <CSVReader
         cssClass="csv-reader-input"
         label="Test"
-        onFileLoaded={this.handleForce}
+        onFileLoaded={this.readFile}
         inputId="ObiWan"
         inputStyle={{ color: 'red' }}
       />

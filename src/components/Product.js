@@ -1,9 +1,10 @@
 class Product {
-  constructor(productName, /*orderId,*/ orderQuantity, category) {
+  constructor(productName, category, subCategory) {
     this.productName = productName;
-    //this.orderId = orderId;
-    this.orderQuantity = orderQuantity;
-    this.category = category;
+    this.categories = [category];
+    this.subCategory = subCategory;
+    this.orders = [];
+    category.products.push(this);
   }
 }
 

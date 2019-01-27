@@ -1,7 +1,7 @@
 class Category {
-  constructor(categoryName, subcategoryName) {
+  constructor(categoryName) {
     this.categoryName = categoryName;
-    this.subcategoryName = subcategoryName;
+    this.products = [];
   }
 }
 
